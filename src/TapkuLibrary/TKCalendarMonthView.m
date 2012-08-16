@@ -555,7 +555,8 @@
 	
 	if(day == selectedDay && selectedPortion == portion) return;
 	
-	
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 	
 	if(portion == 1){
 		selectedDay = day;
@@ -567,8 +568,12 @@
 		selectedDay = day;
 		selectedPortion = portion;
 	}
+    
+#pragma clang diagnostic pop
 	
 }
+
+
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
 	//[super touchesBegan:touches withEvent:event];
 	[self reactToTouch:[touches anyObject] down:NO];
@@ -856,7 +861,7 @@
 	return [currentTile monthDate];
 }
 - (void) selectDate:(NSDate*)date{
-	TKDateInformation info = [date dateInformationWithTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
+	TKDateInformation info = [date dateInformation];
 	NSDate *month = [date firstOfMonth];
 	
 	if([month isEqualToDate:[currentTile monthDate]]){

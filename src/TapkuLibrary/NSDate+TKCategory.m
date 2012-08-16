@@ -123,7 +123,7 @@
 
 - (NSString*) monthString{
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];	
-	[dateFormatter setDateFormat:@"MMMM"];
+	[dateFormatter setDateFormat:@"LLLL"];
 	return [dateFormatter stringFromDate:self];
 }
 - (NSString*) yearString{

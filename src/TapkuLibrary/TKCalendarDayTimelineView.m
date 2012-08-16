@@ -122,10 +122,15 @@
 #pragma mark -
 #pragma mark Execut Method When Notification Fire
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+
 //help executing a method when a notification fire
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
 	[self performSelector:(SEL)context withObject:change];
-} 
+}
+
+#pragma clang diagnostic pop
 
 #pragma mark -
 #pragma mark Setup

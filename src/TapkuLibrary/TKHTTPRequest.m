@@ -183,6 +183,10 @@ static inline NSString * TKKeyPathFromOperationState(TKOperationState state) {
 	
 	[self performSelectorOnMainThread:@selector(_requestStarted) withObject:nil waitUntilDone:[NSThread isMainThread]];
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+
 - (void) _requestStarted{
 	if(self.delegate && [self.delegate respondsToSelector:didStartSelector]) 
 		[self.delegate performSelector:self.didStartSelector withObject:self];
@@ -192,7 +196,7 @@ static inline NSString * TKKeyPathFromOperationState(TKOperationState state) {
 #endif
 }
 
-
+#pragma clang diagnostic pop
 
 
 
@@ -248,6 +252,9 @@ static inline NSString * TKKeyPathFromOperationState(TKOperationState state) {
 	
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+
 - (void) _requestFinished{
 
 	if(self.delegate && [self.delegate respondsToSelector:self.didFinishSelector]) 
@@ -265,6 +272,9 @@ static inline NSString * TKKeyPathFromOperationState(TKOperationState state) {
 	if(failureBlock) failureBlock();
 #endif
 }
+
+#pragma clang diagnostic pop
+
 - (void) failWithError:(NSError *)theError{
 	
 	self.state = TKOperationStateFinished;

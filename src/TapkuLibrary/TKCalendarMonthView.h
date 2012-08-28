@@ -32,6 +32,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+typedef enum
+{
+    TKDayMarkTypeNone,
+    TKDayMarkTypeFull,
+    TKDayMarkTypeEmpty
+} TKDayMarkType;
 
 @class TKCalendarMonthTiles;
 @protocol TKCalendarMonthViewDelegate, TKCalendarMonthViewDataSource;

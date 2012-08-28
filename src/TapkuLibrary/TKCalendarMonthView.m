@@ -155,6 +155,7 @@
 
 #pragma mark -
 #define dotFontSize 18.0
+#define circleFontSize 12.0
 #define dateFontSize 22.0
 @interface TKCalendarMonthTiles (private)
 @property (strong,nonatomic) UIImageView *selectedImageView;
@@ -320,10 +321,12 @@
 	
 	return CGRectMake(col*46, row*44+6, 47, 45);
 }
-- (void) drawTileInRect:(CGRect)r day:(int)day mark:(BOOL)mark font:(UIFont*)f1 font2:(UIFont*)f2{
-	
+
+- (void) drawTileInRect:(CGRect)r day:(int)day mark:(TKDayMarkType)markType{
+    
 	NSString *str = [NSString stringWithFormat:@"%d",day];
 	
+    UIFont *f1 = [UIFont boldSystemFontOfSize:dateFontSize];
 	
 	r.size.height -= 2;
 	[str drawInRect: r
@@ -331,11 +334,19 @@
 	  lineBreakMode: UILineBreakModeWordWrap 
 		  alignment: UITextAlignmentCenter];
 	
-	if(mark){
+	if(markType != TKDayMarkTypeNone)
+    {
 		r.size.height = 10;
 		r.origin.y += 18;
-		
-		[@"•" drawInRect: r
+        NSString *sign = [self markSignByType:markType];
+        CGFloat fontSize = [self markSizeByType:markType];
+        
+        if (markType == TKDayMarkTypeEmpty)
+            r.origin.y += 3;
+        
+        UIFont *f2 =[UIFont boldSystemFontOfSize:fontSize];
+        
+		[sign drawInRect: r
 				withFont: f2
 		   lineBreakMode: UILineBreakModeWordWrap 
 			   alignment: UITextAlignmentCenter];
@@ -360,8 +371,7 @@
 	
 	int index = 0;
 	
-	UIFont *font = [UIFont boldSystemFontOfSize:dateFontSize];
-	UIFont *font2 =[UIFont boldSystemFontOfSize:dotFontSize];
+
 	UIColor *color = [UIColor grayColor];
 	
 	if(firstOfPrev>0){
@@ -369,9 +379,9 @@
 		for(int i = firstOfPrev;i<= lastOfPrev;i++){
 			r = [self rectForCellAtIndex:index];
 			if ([marks count] > 0)
-				[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+				[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
 			else
-				[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+				[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
 			index++;
 		}
 	}
@@ -385,9 +395,9 @@
 		if(today == i) [[UIColor whiteColor] set];
 		
 		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
 		else
-			[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+			[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
 		if(today == i) [color set];
 		index++;
 	}
@@ -397,14 +407,61 @@
 	while(index % 7 != 0){
 		r = [self rectForCellAtIndex:index] ;
 		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
 		else
-			[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+			[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
 		i++;
 		index++;
 	}
 	
 	
+}
+
+- (NSString *)markSignByType:(TKDayMarkType)type
+{
+    switch (type)
+    {
+        case TKDayMarkTypeFull:
+            return @"•";
+        case TKDayMarkTypeEmpty:
+            return @"◦";
+        default:
+            return nil;
+    }
+}
+
+- (CGFloat)markSizeByType:(TKDayMarkType)type
+{
+    switch (type)
+    {
+        case TKDayMarkTypeFull:
+            return dotFontSize;
+        case TKDayMarkTypeEmpty:
+            return circleFontSize;
+        default:
+            return 0;
+    }
+}
+
+- (void)prepareToday:(int)day column:(int)column row:(int)row
+{
+    [self addSubview:self.selectedImageView];
+	self.currentDay.text = [NSString stringWithFormat:@"%d",day];
+	
+	if ([marks count] > 0) {
+		TKDayMarkType type = [[marks objectAtIndex: row * 7 + column ] integerValue];
+		if(type != TKDayMarkTypeNone){
+            self.dot.text = [self markSignByType:type];
+            self.dot.font = [UIFont boldSystemFontOfSize:[self markSizeByType:type]];
+			[self.selectedImageView addSubview:self.dot];
+		}else{
+			[self.dot removeFromSuperview];
+		}
+		
+		
+	}else{
+		[self.dot removeFromSuperview];
+	}
 }
 
 - (void) selectDay:(int)day{
@@ -427,9 +484,6 @@
 	}else if(markWasOnToday){
 		self.dot.shadowOffset = CGSizeMake(0, -1);
 		self.currentDay.shadowOffset = CGSizeMake(0, -1);
-		
-		
-
 		NSString *path = TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Calendar Date Tile Selected.png");
 		self.selectedImageView.image = [[UIImage imageWithContentsOfFile:path] stretchableImageWithLeftCapWidth:1 topCapHeight:0];
 		markWasOnToday = NO;
@@ -437,21 +491,7 @@
 	
 	
 	
-	[self addSubview:self.selectedImageView];
-	self.currentDay.text = [NSString stringWithFormat:@"%d",day];
-	
-	if ([marks count] > 0) {
-		
-		if([[marks objectAtIndex: row * 7 + column ] boolValue]){
-			[self.selectedImageView addSubview:self.dot];
-		}else{
-			[self.dot removeFromSuperview];
-		}
-		
-		
-	}else{
-		[self.dot removeFromSuperview];
-	}
+	[self prepareToday:day column:column row:row];
 	
 	if(column < 0){
 		column = 6;
@@ -533,20 +573,7 @@
 		markWasOnToday = NO;
 	}
 	
-	[self addSubview:self.selectedImageView];
-	self.currentDay.text = [NSString stringWithFormat:@"%d",day];
-	
-	if ([marks count] > 0) {
-		if([[marks objectAtIndex: row * 7 + column] boolValue])
-			[self.selectedImageView addSubview:self.dot];
-		else
-			[self.dot removeFromSuperview];
-	}else{
-		[self.dot removeFromSuperview];
-	}
-	
-
-	
+	[self prepareToday:day column:column row:row];
 	
 	CGRect r = self.selectedImageView.frame;
 	r.origin.x = (column*46);

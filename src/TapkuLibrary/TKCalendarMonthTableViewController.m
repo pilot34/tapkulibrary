@@ -32,17 +32,23 @@
 #import "NSDate+TKCategory.h"
 
 @implementation TKCalendarMonthTableViewController
-@synthesize tableView = _tableView;
 
-- (void) viewDidUnload {
+@synthesize tableView = _tableView;
+@synthesize backgroundView = _backgroundView;
+
+- (void) viewDidUnload
+{
+    [super viewDidUnload];
+    
 	self.tableView.delegate = nil;
 	self.tableView.dataSource = nil;
 	self.tableView = nil;
+    
+    self.backgroundView = nil;
 }
 
 - (void) loadView{
 	[super loadView];
-	self.tableView.backgroundColor = [UIColor whiteColor];
 	
 	float y,height;
 	y = self.monthView.frame.origin.y + self.monthView.frame.size.height;
@@ -55,6 +61,13 @@
 	_tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	[self.view addSubview:_tableView];
 	[self.view sendSubviewToBack:_tableView];
+    
+    self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.separatorColor = [UIColor colorWithRed:93./255 green:25./255 blue:36./255 alpha:1];
+    
+    _backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background"]];
+    [self.view addSubview:_backgroundView];
+    [self.view sendSubviewToBack:_backgroundView];
 }
 
 

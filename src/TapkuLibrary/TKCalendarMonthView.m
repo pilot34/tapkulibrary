@@ -372,7 +372,7 @@
 	int index = 0;
 	
 
-	UIColor *color = [UIColor grayColor];
+	UIColor *color = [UIColor colorWithRed:158./255 green:89./255 blue:88./255 alpha:1];
 	
 	if(firstOfPrev>0){
 		[color set];
@@ -387,7 +387,7 @@
 	}
 	
 	
-	color = [UIColor colorWithRed:59/255. green:73/255. blue:88/255. alpha:1];
+	color = [UIColor colorWithRed:80/255. green:47/255. blue:45/255. alpha:1];
 	[color set];
 	for(int i=1; i <= daysInMonth; i++){
 		
@@ -402,7 +402,8 @@
 		index++;
 	}
 	
-	[[UIColor grayColor] set];
+    color = [UIColor colorWithRed:158./255 green:89./255 blue:88./255 alpha:1];
+	[color set];
 	int i = 1;
 	while(index % 7 != 0){
 		r = [self rectForCellAtIndex:index] ;
@@ -755,7 +756,7 @@
 		label.shadowOffset = CGSizeMake(0, 1);
 		label.font = [UIFont systemFontOfSize:11];
 		label.backgroundColor = [UIColor clearColor];
-		label.textColor = [UIColor colorWithRed:59/255. green:73/255. blue:88/255. alpha:1];
+		label.textColor = [UIColor colorWithRed:80/255. green:47/255. blue:45/255. alpha:1];
 		i++;
 	}
 	
@@ -997,7 +998,7 @@
 		monthYear.textAlignment = UITextAlignmentCenter;
 		monthYear.backgroundColor = [UIColor clearColor];
 		monthYear.font = [UIFont boldSystemFontOfSize:22];
-		monthYear.textColor = [UIColor colorWithRed:59/255. green:73/255. blue:88/255. alpha:1];
+		monthYear.textColor = [UIColor colorWithRed:80/255. green:47/255. blue:45/255. alpha:1];
 	}
 	return monthYear;
 }

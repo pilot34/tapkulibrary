@@ -154,8 +154,7 @@
 @end
 
 #pragma mark -
-#define dotFontSize 18.0
-#define circleFontSize 12.0
+#define markFontSize 8.0
 #define dateFontSize 22.0
 @interface TKCalendarMonthTiles (private)
 @property (strong,nonatomic) UIImageView *selectedImageView;
@@ -322,7 +321,7 @@
 	return CGRectMake(col*46, row*44+6, 47, 45);
 }
 
-- (void) drawTileInRect:(CGRect)r day:(int)day mark:(TKDayMarkType)markType{
+- (void) drawTileInRect:(CGRect)r day:(int)day mark:(NSString *)mark{
     
 	NSString *str = [NSString stringWithFormat:@"%d",day];
 	
@@ -334,22 +333,30 @@
 	  lineBreakMode: UILineBreakModeWordWrap 
 		  alignment: UITextAlignmentCenter];
 	
-	if(markType != TKDayMarkTypeNone)
+	if(mark.length > 0)
     {
 		r.size.height = 10;
-		r.origin.y += 18;
-        NSString *sign = [self markSignByType:markType];
-        CGFloat fontSize = [self markSizeByType:markType];
+		r.origin.y += 24;
         
-        if (markType == TKDayMarkTypeEmpty)
-            r.origin.y += 3;
+        UIFont *f2 =[UIFont boldSystemFontOfSize:markFontSize];
         
-        UIFont *f2 =[UIFont boldSystemFontOfSize:fontSize];
+        NSString *text = [mark stringByReplacingOccurrencesOfString:MARK_OUTLINE_PREFIX withString:@""];
+        BOOL hasPrefix = [mark rangeOfString:MARK_OUTLINE_PREFIX].location == 0;
         
-		[sign drawInRect: r
+        CGContextRef c = UIGraphicsGetCurrentContext();
+        CGContextSetLineWidth(c, 0.5);
+        CGContextSetLineJoin(c, kCGLineJoinRound);
+        
+        if (hasPrefix)
+            CGContextSetTextDrawingMode(c, kCGTextStroke);
+        
+		[text drawInRect: r
 				withFont: f2
 		   lineBreakMode: UILineBreakModeWordWrap 
 			   alignment: UITextAlignmentCenter];
+        
+        if (hasPrefix)
+            CGContextSetTextDrawingMode(c, kCGTextFill);
 	}
 	
 	
@@ -379,9 +386,9 @@
 		for(int i = firstOfPrev;i<= lastOfPrev;i++){
 			r = [self rectForCellAtIndex:index];
 			if ([marks count] > 0)
-				[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
+				[self drawTileInRect:r day:i mark:[marks objectAtIndex:index]];
 			else
-				[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
+				[self drawTileInRect:r day:i mark:nil];
 			index++;
 		}
 	}
@@ -395,9 +402,9 @@
 		if(today == i) [[UIColor whiteColor] set];
 		
 		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
+			[self drawTileInRect:r day:i mark:[marks objectAtIndex:index]];
 		else
-			[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
+			[self drawTileInRect:r day:i mark:nil];
 		if(today == i) [color set];
 		index++;
 	}
@@ -408,9 +415,9 @@
 	while(index % 7 != 0){
 		r = [self rectForCellAtIndex:index] ;
 		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] integerValue]];
+			[self drawTileInRect:r day:i mark:[marks objectAtIndex:index]];
 		else
-			[self drawTileInRect:r day:i mark:TKDayMarkTypeEmpty];
+			[self drawTileInRect:r day:i mark:nil];
 		i++;
 		index++;
 	}
@@ -418,42 +425,18 @@
 	
 }
 
-- (NSString *)markSignByType:(TKDayMarkType)type
-{
-    switch (type)
-    {
-        case TKDayMarkTypeFull:
-            return @"•";
-        case TKDayMarkTypeEmpty:
-            return @"◦";
-        default:
-            return nil;
-    }
-}
-
-- (CGFloat)markSizeByType:(TKDayMarkType)type
-{
-    switch (type)
-    {
-        case TKDayMarkTypeFull:
-            return dotFontSize;
-        case TKDayMarkTypeEmpty:
-            return circleFontSize;
-        default:
-            return 0;
-    }
-}
-
 - (void)prepareToday:(int)day column:(int)column row:(int)row
 {
     [self addSubview:self.selectedImageView];
 	self.currentDay.text = [NSString stringWithFormat:@"%d",day];
-	
-	if ([marks count] > 0) {
-		TKDayMarkType type = [[marks objectAtIndex: row * 7 + column ] integerValue];
-		if(type != TKDayMarkTypeNone){
-            self.dot.text = [self markSignByType:type];
-            self.dot.font = [UIFont boldSystemFontOfSize:[self markSizeByType:type]];
+	NSInteger index = row * 7 + column;
+	if ([marks count] > 0 && index >= 0 && index < marks.count) {
+
+		NSString *mark = [marks objectAtIndex: index ];
+		if(mark.length > 0){
+            self.dot.text = [mark stringByReplacingOccurrencesOfString:MARK_OUTLINE_PREFIX withString:@""];
+            self.dot.font = [UIFont boldSystemFontOfSize:markFontSize];
+            self.dot.alpha = [mark rangeOfString:MARK_OUTLINE_PREFIX].location == 0 ? 0.4 : 1;
 			[self.selectedImageView addSubview:self.dot];
 		}else{
 			[self.dot removeFromSuperview];
@@ -635,10 +618,9 @@
 		r.size.height -= 31;
 		dot = [[UILabel alloc] initWithFrame:r];
 		
-		dot.text = @"•";
 		dot.textColor = [UIColor whiteColor];
 		dot.backgroundColor = [UIColor clearColor];
-		dot.font = [UIFont boldSystemFontOfSize:dotFontSize];
+		dot.font = [UIFont boldSystemFontOfSize:markFontSize];
 		dot.textAlignment = UITextAlignmentCenter;
 		dot.shadowColor = [UIColor darkGrayColor];
 		dot.shadowOffset = CGSizeMake(0, -1);
